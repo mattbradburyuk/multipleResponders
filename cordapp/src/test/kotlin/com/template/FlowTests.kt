@@ -33,7 +33,7 @@ class FlowTests {
     fun tearDown() = network.stopNodes()
 
     @Test
-    fun `partyA test`() {
+    fun `partyA test with flow inheritance`() {
 
         val flow = Initiator_A()
 
@@ -47,7 +47,7 @@ class FlowTests {
 
 
     @Test
-    fun `partyB test`() {
+    fun `partyB test with flow inheritance`() {
 
         val flow = Initiator_B()
 
@@ -58,4 +58,32 @@ class FlowTests {
         future.getOrThrow()
 
     }
+
+    @Test
+    fun `partyA test with subflows`() {
+
+        val flow = Initiator_A2()
+
+        val future = a.startFlow(flow)
+
+        network.runNetwork()
+
+        future.getOrThrow()
+
+    }
+
+
+    @Test
+    fun `partyB test with subflows`() {
+
+        val flow = Initiator_B2()
+
+        val future = b.startFlow(flow)
+
+        network.runNetwork()
+
+        future.getOrThrow()
+
+    }
+
 }

@@ -1,8 +1,6 @@
 package com.template
 
 import co.paralleluniverse.fibers.Suspendable
-import com.template.TemplateContract.Companion.ID
-import net.corda.core.contracts.Requirements.using
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
 import net.corda.core.identity.CordaX500Name
@@ -36,7 +34,7 @@ class TemplateApi(val rpcOps: CordaRPCOps) {
 
 @Path("initiate")
 class InitiateApi(val rpcOps: CordaRPCOps) {
-    // Accessible at /api/template/templateGetEndpoint.
+
     @GET
     @Path("partyA")
     @Produces(MediaType.APPLICATION_JSON)
@@ -47,7 +45,7 @@ class InitiateApi(val rpcOps: CordaRPCOps) {
         return Response.ok("partyA Initiator called").build()
     }
 
-    // Accessible at /api/template/templateGetEndpoint.
+
     @GET
     @Path("partyB")
     @Produces(MediaType.APPLICATION_JSON)
@@ -58,6 +56,27 @@ class InitiateApi(val rpcOps: CordaRPCOps) {
         return Response.ok("partyB Initiator called").build()
     }
 
+
+    @GET
+    @Path("partyA2")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun PartyA2Endpoint(): Response {
+
+        rpcOps.startFlow(::Initiator_A2).returnValue.get()
+
+        return Response.ok("partyA Initiator_A2 called").build()
+    }
+
+
+    @GET
+    @Path("partyB2")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun PartyB2Endpoint(): Response {
+
+        rpcOps.startFlow(::Initiator_B2).returnValue.get()
+
+        return Response.ok("partyB Initiator_B2 called").build()
+    }
 }
 
 @Path("vault")
@@ -78,121 +97,85 @@ class VaultApi(val rpcOps: CordaRPCOps) {
 // *********
 // * Flows *
 // *********
+
+
+/**
+ * Initiators for responders using flow inheritance
+ */
+
 @InitiatingFlow
 @StartableByRPC
-class Initiator_A : FlowLogic<Unit>() {
+class Initiator_A: CommonInitiator("PartyA data")
+
+@InitiatingFlow
+@StartableByRPC
+class Initiator_B: CommonInitiator("PartyB data")
+
+
+/**
+ * Initiators for responders using subflows
+ */
+
+@InitiatingFlow
+@StartableByRPC
+class Initiator_A2: CommonInitiator("PartyA2 data")
+
+@InitiatingFlow
+@StartableByRPC
+class Initiator_B2: CommonInitiator("PartyB2 data")
+
+
+open class CommonInitiator(val data: String) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
         // Flow implementation goes here
 
-        logger.info("MB: Initiator_A called")
-
+        logger.info("MB: CommonInitiator called")
 
         val partyCX500 = CordaX500Name("PartyC","Paris","FR")
-
-        logger.info("MB: partyCX500 = $partyCX500")
-
         val me: Party = serviceHub.myInfo.legalIdentities.single()
         val partyCOrNull: Party? = serviceHub.networkMapCache.getPeerByLegalName(partyCX500)
 
         logger.info("MB: partyCorNull = $partyCOrNull")
 
         if (partyCOrNull != null) {
-
             logger.info("PartyC found")
-        } else
-        {
+        } else {
             logger.info("PartyC not found")
             throw(FlowException("PartyC not Found"))
-
         }
         val partyC: Party = partyCOrNull!!
-        val state = TemplateState("Party A data", listOf(me, partyC))
+        val state = TemplateState(data, listOf(me, partyC))
 
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val tx = TransactionBuilder(notary)
-
         tx.addOutputState(state, TemplateContract.ID)
         tx.addCommand(TemplateContract.Commands.Action(), me.owningKey, partyC.owningKey)
-
-
         tx.verify(serviceHub)
 
         val ptx = serviceHub.signInitialTransaction(tx)
         val session = initiateFlow(partyC)
-
         val stx = subFlow(CollectSignaturesFlow(ptx, listOf(session)))
-
         val ftx = subFlow(FinalityFlow(stx))
 
     }
 }
 
 
-@InitiatingFlow
-@StartableByRPC
-class Initiator_B : FlowLogic<Unit>() {
-    @Suspendable
-    override fun call() {
-        // Flow implementation goes here
-
-        logger.info("MB: Initiator_B called")
-
-        val partyCX500 = CordaX500Name("PartyC","Paris","FR")
-
-        logger.info("MB: partyCX500 = $partyCX500")
-
-        val me: Party = serviceHub.myInfo.legalIdentities.single()
-        val partyCOrNull: Party? = serviceHub.networkMapCache.getPeerByLegalName(partyCX500)
-
-        logger.info("MB: partyCorNull = $partyCOrNull")
-
-        if (partyCOrNull != null) {
-
-            logger.info("PartyC found")
-        } else
-        {
-            logger.info("PartyC not found")
-            throw(FlowException("PartyC not Found"))
-
-        }
-        val partyC: Party = partyCOrNull!!
-        val state = TemplateState("Party B data", listOf(me, partyC))
-
-        val notary = serviceHub.networkMapCache.notaryIdentities.first()
-        val tx = TransactionBuilder(notary)
-
-        tx.addOutputState(state, TemplateContract.ID)
-        tx.addCommand(TemplateContract.Commands.Action(), me.owningKey, partyC.owningKey)
-
-
-        tx.verify(serviceHub)
-
-        val ptx = serviceHub.signInitialTransaction(tx)
-        val session = initiateFlow(partyC)
-
-        val stx = subFlow(CollectSignaturesFlow(ptx, listOf(session)))
-
-        val ftx = subFlow(FinalityFlow(stx))
-
-    }
-}
-
-
+/**
+ * Responders using flow inheritance
+ */
 
 
 @InitiatedBy(Initiator_A::class)
 class Responder_A(counterpartySession: FlowSession) : CommonResponder(counterpartySession)
 
-
 @InitiatedBy(Initiator_B::class)
 class Responder_B(counterpartySession: FlowSession) : CommonResponder(counterpartySession)
-
 
 open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
-        // Flow implementation goes here
 
         logger.info("MB:  ${serviceHub.myInfo.legalIdentities.single().name} Responder flow called from: ${counterpartySession.counterparty.name }")
 
@@ -209,6 +192,48 @@ open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Uni
 }
 
 
+/**
+ * responders using subflows
+ */
+
+@InitiatedBy(Initiator_A2::class)
+class Responder_A2(val counterpartySession: FlowSession) : FlowLogic<Unit>(){
+
+    @Suspendable
+    override fun call() {
+        val flow = CommonResponder_2(counterpartySession)
+        subFlow(flow)
+    }
+}
+
+@InitiatedBy(Initiator_B2::class)
+class Responder_B2(val counterpartySession: FlowSession) : FlowLogic<Unit>(){
+
+    @Suspendable
+    override fun call() {
+        val flow = CommonResponder_2(counterpartySession)
+        subFlow(flow)
+    }
+}
+
+
+open class CommonResponder_2 (val counterpartySession: FlowSession) : FlowLogic<Unit>() {
+    @Suspendable
+    override fun call() {
+
+        logger.info("MB:  ${serviceHub.myInfo.legalIdentities.single().name} Responder flow called from: ${counterpartySession.counterparty.name }")
+
+        val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
+            override fun checkTransaction(stx: SignedTransaction) = requireThat {
+                val output = stx.tx.outputs.single().data
+                "This must be a Template transaction" using (output is TemplateState)
+            }
+        }
+
+        subFlow(signedTransactionFlow)
+
+    }
+}
 
 
 
