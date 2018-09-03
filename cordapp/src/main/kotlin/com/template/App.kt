@@ -3,6 +3,7 @@ package com.template
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.flows.*
 import net.corda.core.messaging.CordaRPCOps
+import net.corda.core.messaging.startFlow
 import net.corda.core.serialization.SerializationWhitelist
 import net.corda.webserver.services.WebServerPluginRegistry
 import java.util.function.Function
@@ -26,6 +27,35 @@ class TemplateApi(val rpcOps: CordaRPCOps) {
     }
 }
 
+@Path("initiate")
+class InitiateApi(val rpcOps: CordaRPCOps) {
+    // Accessible at /api/template/templateGetEndpoint.
+    @GET
+    @Path("partyA")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun PartyAEndpoint(): Response {
+
+        rpcOps.startFlow(::Initiator).returnValue.get()
+
+        return Response.ok("partyA Initiator called").build()
+    }
+
+    // Accessible at /api/template/templateGetEndpoint.
+    @GET
+    @Path("partyB")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun PartyBEndpoint(): Response {
+
+        rpcOps.startFlow(::Initiator).returnValue.get()
+
+        return Response.ok("partyB Initiator called").build()
+    }
+
+
+}
+
+
+
 // *********
 // * Flows *
 // *********
@@ -35,6 +65,9 @@ class Initiator : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
         // Flow implementation goes here
+
+        logger.info("MB: Initiator called")
+
     }
 }
 
@@ -43,6 +76,8 @@ class Responder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
         // Flow implementation goes here
+
+
     }
 }
 
@@ -51,7 +86,7 @@ class Responder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
 // ***********
 class TemplateWebPlugin : WebServerPluginRegistry {
     // A list of lambdas that create objects exposing web JAX-RS REST APIs.
-    override val webApis: List<Function<CordaRPCOps, out Any>> = listOf(Function(::TemplateApi))
+    override val webApis: List<Function<CordaRPCOps, out Any>> = listOf(Function(::TemplateApi), Function(::InitiateApi))
     //A list of directories in the resources directory that will be served by Jetty under /web.
     // This template's web frontend is accessible at /web/template.
     override val staticServeDirs: Map<String, String> = mapOf(
