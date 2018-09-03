@@ -21,7 +21,8 @@ class FlowTests {
 
     init {
         listOf(a, b, c).forEach {
-            it.registerInitiatedFlow(Responder::class.java)
+            it.registerInitiatedFlow(Responder_A::class.java)
+            it.registerInitiatedFlow(Responder_B::class.java)
         }
     }
 

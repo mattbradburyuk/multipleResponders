@@ -138,18 +138,61 @@ class Initiator_B : FlowLogic<Unit>() {
 
         logger.info("MB: Initiator_B called")
 
+        val partyCX500 = CordaX500Name("PartyC","Paris","FR")
+
+        logger.info("MB: partyCX500 = $partyCX500")
+
+        val me: Party = serviceHub.myInfo.legalIdentities.single()
+        val partyCOrNull: Party? = serviceHub.networkMapCache.getPeerByLegalName(partyCX500)
+
+        logger.info("MB: partyCorNull = $partyCOrNull")
+
+        if (partyCOrNull != null) {
+
+            logger.info("PartyC found")
+        } else
+        {
+            logger.info("PartyC not found")
+            throw(FlowException("PartyC not Found"))
+
+        }
+        val partyC: Party = partyCOrNull!!
+        val state = TemplateState("Party B data", listOf(me, partyC))
+
+        val notary = serviceHub.networkMapCache.notaryIdentities.first()
+        val tx = TransactionBuilder(notary)
+
+        tx.addOutputState(state, TemplateContract.ID)
+        tx.addCommand(TemplateContract.Commands.Action(), me.owningKey, partyC.owningKey)
+
+
+        tx.verify(serviceHub)
+
+        val ptx = serviceHub.signInitialTransaction(tx)
+        val session = initiateFlow(partyC)
+
+        val stx = subFlow(CollectSignaturesFlow(ptx, listOf(session)))
+
+        val ftx = subFlow(FinalityFlow(stx))
+
     }
 }
 
 
 
+
 @InitiatedBy(Initiator_A::class)
-class Responder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
+class Responder_A(counterpartySession: FlowSession) : CommonResponder(counterpartySession)
+
+
+@InitiatedBy(Initiator_B::class)
+class Responder_B(counterpartySession: FlowSession) : CommonResponder(counterpartySession)
+
+
+open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
         // Flow implementation goes here
-
-
 
         logger.info("MB:  ${serviceHub.myInfo.legalIdentities.single().name} Responder flow called from: ${counterpartySession.counterparty.name }")
 
@@ -162,10 +205,12 @@ class Responder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
 
         subFlow(signedTransactionFlow)
 
-
-
     }
 }
+
+
+
+
 
 // ***********
 // * Plugins *
