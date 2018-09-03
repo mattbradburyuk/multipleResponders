@@ -57,11 +57,11 @@ Two approaches for the responder:
 
 To get started, clone this repository with:
 
-     ** to add **
+    git clone https://github.com/mattbradburyuk/multipleInitiators.git
 
-And change directories to the newly cloned repo:
+And change directories to the newly cloned repo
 
-     ** to add **
+     
 
 ## Building the CorDapp template:
 
