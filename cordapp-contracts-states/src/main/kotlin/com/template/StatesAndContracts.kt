@@ -29,6 +29,5 @@ class TemplateContract : Contract {
 // *********
 // * State *
 // *********
-data class TemplateState(val data: String) : ContractState {
-    override val participants: List<AbstractParty> = listOf()
-}
+data class TemplateState(val data: String,
+                         override val participants: List<AbstractParty> = listOf()) : ContractState

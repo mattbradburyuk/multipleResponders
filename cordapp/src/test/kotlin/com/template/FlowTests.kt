@@ -1,5 +1,7 @@
 package com.template
 
+import net.corda.core.identity.CordaX500Name
+import net.corda.core.utilities.getOrThrow
 import net.corda.testing.node.MockNetwork
 import org.junit.After
 import org.junit.Before
@@ -8,11 +10,17 @@ import org.junit.Test
 class FlowTests {
 
     private val network = MockNetwork(listOf("com.template"))
-    private val a = network.createNode()
-    private val b = network.createNode()
+
+    val aX500 = CordaX500Name("PartyA","London","GB")
+    val bX500 = CordaX500Name("PartyB","New York","US")
+    val cX500 = CordaX500Name("PartyC","Paris","FR")
+
+    private val a = network.createPartyNode(aX500)
+    private val b = network.createNode(bX500)
+    private val c = network.createNode(cX500)
 
     init {
-        listOf(a, b).forEach {
+        listOf(a, b, c).forEach {
             it.registerInitiatedFlow(Responder::class.java)
         }
     }
@@ -24,7 +32,29 @@ class FlowTests {
     fun tearDown() = network.stopNodes()
 
     @Test
-    fun `dummy test`() {
+    fun `partyA test`() {
+
+        val flow = Initiator_A()
+
+        val future = a.startFlow(flow)
+
+        network.runNetwork()
+
+        future.getOrThrow()
+
+    }
+
+
+    @Test
+    fun `partyB test`() {
+
+        val flow = Initiator_B()
+
+        val future = b.startFlow(flow)
+
+        network.runNetwork()
+
+        future.getOrThrow()
 
     }
 }
