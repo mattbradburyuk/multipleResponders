@@ -60,6 +60,19 @@ class InitiateApi(val rpcOps: CordaRPCOps) {
 
 }
 
+@Path("vault")
+class VaultApi(val rpcOps: CordaRPCOps) {
+    // Accessible at /api/template/templateGetEndpoint.
+    @GET
+    @Path("getStates")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun templateGetEndpoint(): Response {
+
+        val states = rpcOps.vaultQuery(TemplateState::class.java)
+
+        return Response.ok(states).build()
+    }
+}
 
 
 // *********
@@ -135,6 +148,11 @@ class Responder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
         // Flow implementation goes here
+
+
+
+        logger.info("MB:  ${serviceHub.myInfo.legalIdentities.single().name} Responder flow called from: ${counterpartySession.counterparty.name }")
+
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
                 val output = stx.tx.outputs.single().data
@@ -154,7 +172,7 @@ class Responder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
 // ***********
 class TemplateWebPlugin : WebServerPluginRegistry {
     // A list of lambdas that create objects exposing web JAX-RS REST APIs.
-    override val webApis: List<Function<CordaRPCOps, out Any>> = listOf(Function(::TemplateApi), Function(::InitiateApi))
+    override val webApis: List<Function<CordaRPCOps, out Any>> = listOf(Function(::TemplateApi), Function(::InitiateApi),Function(::VaultApi))
     //A list of directories in the resources directory that will be served by Jetty under /web.
     // This template's web frontend is accessible at /web/template.
     override val staticServeDirs: Map<String, String> = mapOf(
