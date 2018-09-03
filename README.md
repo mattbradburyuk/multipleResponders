@@ -1,6 +1,6 @@
 
 
-# Multiple Initiating flows to one initiatedBy flow - code example
+# Multiple Initiating flows to one InitiatedBy flow - code example
 
 A CorDapp to test out having a single responder flow to multiple initiating flows.
 
@@ -78,6 +78,14 @@ And change directories to the newly cloned repo
 Note: You'll need to re-run this build step after making any changes to
 the template for these to take effect on the node.
 
+If it goes wrong try 
+    
+    killall java -9
+    
+    ./gradlew clean
+    
+then retry to buildNodes
+
 ## Running the Nodes
 
 Once the build finishes, change directories to the folder where the newly
@@ -111,7 +119,7 @@ under `build/nodes/partyX`:
      PartyB: localhost:10010
      PartyC: localhost:10013 
 
-##http calls
+## http calls
 
 http://localhost:10007/api/initiate/partyA - Flow from partyA to responder using inherited flows
 http://localhost:10010/api/initiate/partyB - Flow from partyB to responder using inherited flows
