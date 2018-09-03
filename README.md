@@ -1,8 +1,10 @@
-![Corda](https://www.corda.net/wp-content/uploads/2016/11/fg005_corda_b.png)
+
 
 # Multiple Initiating flows to one initiatedBy flow - code example
 
 A CorDapp to test out having a single responder flow to multiple initiating flows.
+
+
 
 Two approaches for the responder:
 
@@ -117,3 +119,7 @@ http://localhost:10007/api/initiate/partyA2 - Flow from partyA to responder usin
 http://localhost:10010/api/initiate/partyB2 - Flow from partyB to responder using subflows
 
 http://localhost:10013/api/vault/getStates - see what turns up in PartyC vault
+
+## 
+
+(Note, this repo is based on the Cordapp Template from R3: https://github.com/corda/cordapp-template-kotlin)
