@@ -80,7 +80,10 @@ dependencies {
     // We've defined Cash as a dependent CorDapp as an example.
     cordapp project(":cordapp")
     cordapp project(":cordapp-contracts-states")
+    cordapp project(":cordapp-partyA-initiator")
+    cordapp project(":cordapp-partyB-responder")
     cordapp project(":cordapp-partyC-responder")
+    cordapp project(":cordapp-partyD-responder")
     cordapp "$corda_release_group:corda-finance:$corda_release_version"
 }
 
