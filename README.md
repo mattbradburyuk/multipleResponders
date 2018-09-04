@@ -84,3 +84,5 @@ http://localhost:10013/api/vault/getStates - see what turns up in PartyC vault
 ## 
 
 (Note, this repo is based on the Cordapp Template from R3: https://github.com/corda/cordapp-template-kotlin)
+
+MB note to self: git push -u origin master
