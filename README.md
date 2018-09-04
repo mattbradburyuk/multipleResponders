@@ -3,66 +3,19 @@
 # Work in progress - not done yet
 
 
-# Multiple Initiating flows to one InitiatedBy flow - code example
+# Multiple Responder flows to one Initiating flows - code example
 
 A CorDapp to test out having multiple responder flow to a single initiating flow.
 
 
 
-Two approaches for the responder:
 
-1) Flow inheritance 
-
-```kotlin
-    @InitiatedBy(Initiator_A::class)
-    class Responder_A(counterpartySession: FlowSession) : CommonResponder(counterpartySession)
-    
-    @InitiatedBy(Initiator_B::class)
-    class Responder_B(counterpartySession: FlowSession) : CommonResponder(counterpartySession)
-    
-    open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
-        @Suspendable
-        override fun call() {
-            //do stuff
-        }
-    }
-```
-2) Subflows 
-```kotlin
-    @InitiatedBy(Initiator_A2::class)
-    class Responder_A2(val counterpartySession: FlowSession) : FlowLogic<Unit>(){
-    
-        @Suspendable
-        override fun call() {
-            val flow = CommonResponder_2(counterpartySession)
-            subFlow(flow)
-        }
-    }
-    
-    @InitiatedBy(Initiator_B2::class)
-    class Responder_B2(val counterpartySession: FlowSession) : FlowLogic<Unit>(){
-    
-        @Suspendable
-        override fun call() {
-            val flow = CommonResponder_2(counterpartySession)
-            subFlow(flow)
-        }
-    }
-    
-    
-    open class CommonResponder_2 (val counterpartySession: FlowSession) : FlowLogic<Unit>() {
-        @Suspendable
-        override fun call() {
-            //do stuff
-        }
-    }
-```
 
 ## Getting Set Up
 
 To get started, clone this repository with:
 
-    git clone https://github.com/mattbradburyuk/multipleInitiators.git
+    git clone https://github.com/mattbradburyuk/multipleResponders.git
 
 And change directories to the newly cloned repo
 
@@ -124,10 +77,7 @@ under `build/nodes/partyX`:
 
 ## http calls
 
-http://localhost:10007/api/initiate/partyA - Flow from partyA to responder using inherited flows
-http://localhost:10010/api/initiate/partyB - Flow from partyB to responder using inherited flows
-http://localhost:10007/api/initiate/partyA2 - Flow from partyA to responder using subflows
-http://localhost:10010/api/initiate/partyB2 - Flow from partyB to responder using subflows
+
 
 http://localhost:10013/api/vault/getStates - see what turns up in PartyC vault
 
