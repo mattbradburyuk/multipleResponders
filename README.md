@@ -1,8 +1,11 @@
 
 
+#Work in progress - not done yet
+
+
 # Multiple Initiating flows to one InitiatedBy flow - code example
 
-A CorDapp to test out having a single responder flow to multiple initiating flows.
+A CorDapp to test out having multiple responder flow to a single initiating flow.
 
 
 
