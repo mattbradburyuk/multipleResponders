@@ -113,41 +113,6 @@ open class CommonInitiator(val data: String) : FlowLogic<Unit>() {
 }
 
 
-/**
- * Responders using flow inheritance
- */
-
-
-@InitiatedBy(Initiator_A::class)
-class Responder_A(counterpartySession: FlowSession) : CommonResponder(counterpartySession)
-
-
-
-open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Unit>() {
-    @Suspendable
-    override fun call() {
-
-        logger.info("MB:  ${serviceHub.myInfo.legalIdentities.single().name} Responder flow called from: ${counterpartySession.counterparty.name }")
-
-        val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
-            override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                val output = stx.tx.outputs.single().data
-                "This must be a Template transaction" using (output is TemplateState)
-            }
-        }
-
-        subFlow(signedTransactionFlow)
-
-    }
-}
-
-
-/**
- * responders using subflows
- */
-
-
-
 
 
 // ***********
