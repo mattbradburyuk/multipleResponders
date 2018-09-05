@@ -1,4 +1,4 @@
-# Multiple Responder flows to one Initiating flows - code example
+# Multiple Responder flows to one Initiating flow - code example
 
 A CorDapp to test out having multiple responder flows to a single initiating flow.
 
