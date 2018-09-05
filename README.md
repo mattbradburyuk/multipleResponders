@@ -5,7 +5,7 @@
 
 # Multiple Responder flows to one Initiating flows - code example
 
-A CorDapp to test out having multiple responder flow to a single initiating flow.
+A CorDapp to test out having multiple responder flows to a single initiating flow.
 
 - There are 3 Parties (+ the notary)
 
@@ -34,7 +34,7 @@ The usual split out of states and contracts from the main cordapp
 
 #### cordapp-partyA-initiator
 
-Flows and web end points to allow a party to initiate a Flow
+Flows to allow a party to initiate a Flow (also web end points)
 
 ```kotlin
 @InitiatingFlow
@@ -54,7 +54,7 @@ open class CommonInitiator(val data: String, val O: String, val L: String, val C
 
 Bespoke flow for Party B to respond to Initiator_A.
 
-There is a logging line to indicate that it is partyB's bespoke flow responding
+
 
 ```kotlin
 @InitiatedBy(Initiator_A::class)
@@ -70,13 +70,13 @@ open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Uni
     }
 }
 ```
-
+Note, there is a logging line to indicate that it is partyB's bespoke flow responding
 
 #### cordapp-partyC-responder
 
 Bespoke flow for Party C to respond to Initiator_A.
 
-There is a logging line to indicate that it is partyC's bespoke flow responding
+
 
 ```kotlin
 @InitiatedBy(Initiator_A::class)
@@ -92,6 +92,7 @@ open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Uni
 }
 ```
 
+Note, there is a logging line to indicate that it is partyB's bespoke flow responding
 
 ## Setting up build Dependencies
 
@@ -165,7 +166,7 @@ And change directories to the newly cloned repo
 Note: You'll need to re-run this build step after making any changes to
 the template for these to take effect on the node.
 
-If it goes wrong try 
+If it goes wrong, or you want to clean up the nodes try 
     
     killall java -9
     
@@ -208,9 +209,14 @@ under `build/nodes/partyX`:
 
 ## http calls
 
+To interact with the app use: 
+
 http://localhost:10007/api/initiate/topartyB - start a flow from PartyA to Party B
+
 http://localhost:10007/api/initiate/topartyC - start a flow from PartyA to Party C
+
 http://localhost:10010/api/vault/getStates - see what turns up in PartyB vault
+
 http://localhost:10013/api/vault/getStates - see what turns up in PartyC vault
 
 ## 
