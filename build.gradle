@@ -83,7 +83,7 @@ dependencies {
     cordapp project(":cordapp-partyA-initiator")
     cordapp project(":cordapp-partyB-responder")
     cordapp project(":cordapp-partyC-responder")
-    cordapp project(":cordapp-partyD-responder")
+//    cordapp project(":cordapp-partyD-responder")
     cordapp "$corda_release_group:corda-finance:$corda_release_version"
 }
 
@@ -142,6 +142,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         webPort 10010
         cordapps = [
                 "$project.group:cordapp-contracts-states:$project.version",
+                "$project.group:cordapp-partyB-responder:$project.version",
                 "$project.group:cordapp:$project.version",
                 "$corda_release_group:corda-finance:$corda_release_version"
         ]

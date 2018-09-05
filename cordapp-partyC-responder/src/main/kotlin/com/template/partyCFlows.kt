@@ -24,7 +24,7 @@ open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Uni
     override fun call() {
 
         logger.info("MB: response from partyCFlows")
-        logger.info("MB:  ${serviceHub.myInfo.legalIdentities.single().name} Responder flow called from: ${counterpartySession.counterparty.name }")
+        logger.info("MB:  ${serviceHub.myInfo.legalIdentities.single().name} Responder flow called by: ${counterpartySession.counterparty.name }")
 
         val signedTransactionFlow = object : SignTransactionFlow(counterpartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {

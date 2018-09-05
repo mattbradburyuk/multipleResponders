@@ -36,14 +36,26 @@ class TemplateApi(val rpcOps: CordaRPCOps) {
 class InitiateApi(val rpcOps: CordaRPCOps) {
 
     @GET
-    @Path("partyA")
+    @Path("topartyB")
     @Produces(MediaType.APPLICATION_JSON)
-    fun PartyAEndpoint(): Response {
+    fun toPartyBEndpoint(): Response {
 
-        rpcOps.startFlow(::Initiator_A).returnValue.get()
+        rpcOps.startFlow(::Initiator_A,"PartyA data to Party B", "PartyB","New York","US" ).returnValue.get()
 
         return Response.ok("partyA Initiator called").build()
     }
+
+    @GET
+    @Path("topartyC")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun toPartyCEndpoint(): Response {
+
+        rpcOps.startFlow(::Initiator_A,"PartyA data to PartyC", "PartyC","Paris","FR" ).returnValue.get()
+
+        return Response.ok("partyA Initiator called").build()
+    }
+
+
 
 }
 
@@ -73,39 +85,40 @@ class VaultApi(val rpcOps: CordaRPCOps) {
 
 @InitiatingFlow
 @StartableByRPC
-class Initiator_A: CommonInitiator("PartyA data")
+class Initiator_A(D:String,  O: String, L: String, C:String) : CommonInitiator(D, O, L, C)
 
 
-open class CommonInitiator(val data: String) : FlowLogic<Unit>() {
+open class CommonInitiator(val data: String, val O: String, val L: String, val C:String) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
         // Flow implementation goes here
 
         logger.info("MB: CommonInitiator called")
 
-        val partyCX500 = CordaX500Name("PartyC","Paris","FR")
+        val x500 = CordaX500Name(O ,L, C)
+
         val me: Party = serviceHub.myInfo.legalIdentities.single()
-        val partyCOrNull: Party? = serviceHub.networkMapCache.getPeerByLegalName(partyCX500)
+        val partyOrNull: Party? = serviceHub.networkMapCache.getPeerByLegalName(x500)
 
-        logger.info("MB: partyCorNull = $partyCOrNull")
+        logger.info("MB: partyOrNull = $partyOrNull")
 
-        if (partyCOrNull != null) {
-            logger.info("PartyC found")
+        if (partyOrNull != null) {
+            logger.info("Party $x500 found")
         } else {
-            logger.info("PartyC not found")
-            throw(FlowException("PartyC not Found"))
+            logger.info("Party $x500 not found")
+            throw(FlowException("Party $x500 not Found"))
         }
-        val partyC: Party = partyCOrNull!!
-        val state = TemplateState(data, listOf(me, partyC))
+        val party: Party = partyOrNull!!
+        val state = TemplateState(data, listOf(me, party))
 
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val tx = TransactionBuilder(notary)
         tx.addOutputState(state, TemplateContract.ID)
-        tx.addCommand(TemplateContract.Commands.Action(), me.owningKey, partyC.owningKey)
+        tx.addCommand(TemplateContract.Commands.Action(), me.owningKey, party.owningKey)
         tx.verify(serviceHub)
 
         val ptx = serviceHub.signInitialTransaction(tx)
-        val session = initiateFlow(partyC)
+        val session = initiateFlow(party)
         val stx = subFlow(CollectSignaturesFlow(ptx, listOf(session)))
         val ftx = subFlow(FinalityFlow(stx))
 
