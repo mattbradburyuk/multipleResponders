@@ -1,8 +1,3 @@
-
-
-# Work in progress - not done yet
-
-
 # Multiple Responder flows to one Initiating flows - code example
 
 A CorDapp to test out having multiple responder flows to a single initiating flow.
