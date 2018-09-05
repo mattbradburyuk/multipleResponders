@@ -9,23 +9,23 @@ A CorDapp to test out having multiple responder flow to a single initiating flow
 
 
 
-# Modules
+## Split into Modules
 
 To enable different responder flows the initiator and responder flows have been separated into different modules:
 
 Note, I have used a CommonInitiator and CommonResponder super class for each of the initiators and responders which gives more flexibility if there were more initiators or responders, but that's not necessary for the pattern to work.
 
 
-### cordapp
+#### cordapp
 
 Common functionality eg vault query (not much else))
 
-### cordapp-contracts-states 
+#### cordapp-contracts-states 
 
 The usual split out of states and contracts from the main cordapp
 
 
-### cordapp-partyA-initiator
+#### cordapp-partyA-initiator
 
 Flows and web end points to allow a party to initiate a Flow
 
@@ -43,7 +43,7 @@ open class CommonInitiator(val data: String, val O: String, val L: String, val C
 ```
 
 
-### cordapp-partyB-responder
+#### cordapp-partyB-responder
 
 Bespoke flow for Party B to respond to Initiator_A.
 
@@ -65,7 +65,7 @@ open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Uni
 ```
 
 
-### cordapp-partyC-responder
+#### cordapp-partyC-responder
 
 Bespoke flow for Party C to respond to Initiator_A.
 
@@ -90,23 +90,23 @@ open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Uni
 
 The build dependencies for each module are as follows
 
-### multipleResponders
+#### multipleResponders
 
 
-### cordapp
+#### cordapp
 
 ```gradle
 cordapp project(":cordapp-contracts-states")
 ```
 
-### cordapp-partyA-initiator
+#### cordapp-partyA-initiator
 
 ```gradle
 cordapp project(":cordapp")
 cordapp project(":cordapp-contracts-states")
 ```
 
-### cordapp-partyB-responder and cordapp-partyC-responder
+#### cordapp-partyB-responder and cordapp-partyC-responder
 
 ```gradle
 cordapp project(":cordapp")
