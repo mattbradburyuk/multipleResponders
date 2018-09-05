@@ -7,6 +7,13 @@
 
 A CorDapp to test out having multiple responder flow to a single initiating flow.
 
+- There are 3 Parties (+ the notary)
+
+- Party A can initiate a flow to either Party B or Party C
+
+- Party B and Party C implement bespoke responder flows to the same Initiator flow from Party A
+
+See below for set up and http calls to interact with the cordapp.
 
 
 ## Split into Modules
@@ -88,9 +95,18 @@ open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Uni
 
 ## Setting up build Dependencies
 
-The build dependencies for each module are as follows
+The build dependencies for each module are specified in each module's build.gradle file as follows:
 
 #### multipleResponders
+
+```gradle
+cordapp project(":cordapp")
+cordapp project(":cordapp-contracts-states")
+cordapp project(":cordapp-partyA-initiator")
+cordapp project(":cordapp-partyB-responder")
+cordapp project(":cordapp-partyC-responder")
+```
+
 
 
 #### cordapp
@@ -113,15 +129,13 @@ cordapp project(":cordapp")
 cordapp project(":cordapp-partyA-initiator")
 cordapp project(":cordapp-contracts-states")
 ```
-the responders need cordapp-partyA-initiator to be able to referene the initiator in the @initiated:
+Note that the responders need cordapp-partyA-initiator dependency to be able to reference the initiator in the @InitiatedBy annotation :
 
 ```kotlin
 @InitiatedBy(Initiator_A::class)
 class Responder_A()
 
 ```
-
-
 
 
 
@@ -194,8 +208,9 @@ under `build/nodes/partyX`:
 
 ## http calls
 
-
-
+http://localhost:10007/api/initiate/topartyB - start a flow from PartyA to Party B
+http://localhost:10007/api/initiate/topartyC - start a flow from PartyA to Party C
+http://localhost:10010/api/vault/getStates - see what turns up in PartyB vault
 http://localhost:10013/api/vault/getStates - see what turns up in PartyC vault
 
 ## 
