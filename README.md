@@ -86,7 +86,7 @@ open class CommonResponder(val counterpartySession: FlowSession) : FlowLogic<Uni
 ```
 
 
-##Dependencies
+## Setting up build Dependencies
 
 The build dependencies for each module are as follows
 
